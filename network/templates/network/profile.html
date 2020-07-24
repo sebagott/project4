@@ -1,0 +1,30 @@
+{% extends "network/layout.html" %}
+{% load static %}
+{% block script %}
+    <script src="{% static 'network/profile.js' %}" type="module"></script>
+{% endblock %}
+{% block body %}
+    {{ profile_user.username |json_script:"profile_username" }}
+    {{ user.username |json_script:"username" }}
+    <div id="profile-view">
+        <h1>{{ profile_user.username }}</h1>
+        <p> {{ profile_user.email }}</p>
+        <label>Following:</label><label id="following-count"> {{profile_user.following.all | length }} </label>
+        <label>Followers:</label><label id="followers-count"> {{profile_user.followers.all | length }} </label>
+        <br>
+        {% if user.username != profile_user.username %}
+            {% csrf_token %}
+            {% if profile_user in user.following.all %}
+                <button id="follow-btn" class="btn btn-light">Unfollow</button>
+            {% else %}
+                <button id="follow-btn" class="btn btn-light">Follow</button>
+            {% endif %}
+        {% endif %}
+        <div id="posts-view">
+            <h3 id="posts-title">{{ profile_user.username }} posts: </h3>
+            <ul id="posts-list">
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}
