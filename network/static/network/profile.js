@@ -7,21 +7,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Get user's posts
     api.get_user_posts(profile_username)
-        .then(
-        posts => {
+        .then(posts => {
             posts.forEach(p => {
-                document.querySelector("#posts-list").append(api.render_li(p));
+                document.querySelector("#posts-list").append(api.render_html(p));
             })
+            api.set_likes();
         });
-
-    document.querySelector('#follow-btn').addEventListener('click', () => {
-        api.toggle_following(profile_username,username)
-            .then(result => {
-                console.log(result.message); // TODO: Display message
-                const follow_btn = document.querySelector('#follow-btn');
-                follow_btn.innerHTML = follow_btn.innerHTML === 'Follow' ? 'Unfollow' : 'Follow';
-                document.querySelector('#followers-count').innerHTML = result["followers"];
-                document.querySelector('#following-count').innerHTML = result["following"];
-            });
-    });
+    if(profile_username !== username){
+        document.querySelector('#follow-btn').addEventListener('click', () => {
+            api.toggle_following(profile_username)
+                .then(result => {
+                    console.log(result.message); // TODO: Display message
+                    const follow_btn = document.querySelector('#follow-btn');
+                    follow_btn.innerHTML = follow_btn.innerHTML === 'Follow' ? 'Unfollow' : 'Follow';
+                    document.querySelector('#followers-count').innerHTML = result["followers"];
+                    document.querySelector('#following-count').innerHTML = result["following"];
+                });
+        });
+    }
 });

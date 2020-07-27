@@ -87,8 +87,6 @@ def profile(request, username):
                 "profile_user": user
             })
     elif request.method == 'PUT':
-        #data = json.loads(request.body)
-        #follower = User.objects.get(username=data['follower_username'])
         follower = User.objects.get(pk=request.user.id)
         # Toggle following status
         if follower in user.followers.all():
@@ -111,12 +109,49 @@ def profile(request, username):
 # API calls
 @login_required
 def api_create_post(request):
-    pass
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        user = User.objects.get(pk=request.user.id)
+        post = Post(user=user, body=data["body"])
+        post.save()
+        return JsonResponse({
+            "post": post.serialize()
+        }, status=201)
+    else:
+        return JsonResponse({
+            "error": "GET or PUT request required."
+        }, status=400)
 
 
 @login_required
 def api_post(request, post_id):
     pass
+
+@login_required
+def api_like_post(request, post_id):
+    if request.method == 'PUT':
+        user = User.objects.get(pk=request.user.id)
+        try:
+            post = Post.objects.get(pk=post_id)
+            # Toggle following status
+            if user in post.likers.all():
+                post.likers.remove(user)
+                message = f"Unliked post."
+            else:
+                post.likers.add(user)
+                message = f"Liked post."
+            return JsonResponse({
+                "message": message,
+                "likes": post.likers.count(),
+            }, status=201)
+        except Post.DoesNotExist:
+            return HttpResponseNotFound(f"<h1>Post does not exist</h1>")
+    # Like must be via PUT
+    else:
+        return JsonResponse({
+            "error": "PUT request required."
+        }, status=400)
+
 
 def api_all_posts(request):
     # Get all posts in reverse chronologial order

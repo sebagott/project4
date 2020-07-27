@@ -5,19 +5,17 @@
 {% endblock %}
 {% block body %}
     {{ following |json_script:"following" }}
-    {% if user.is_authenticated %}
-        {{ user.username |json_script:"username" }}
-    {% endif %}
-    <div id="newpost-view" class="mt-3">
-        <form id="newpost-form" method="post">
-            {% csrf_token %}
-            <input name="newpost-body" class="form-control" type="text" placeholder="Write your post here">
-            <input type="submit" class="btn btn-light mt-3" value="Post"/>
-        </form>
-    </div>
+
     <div id="posts-view">
-        <h3 id="posts-title"></h3>
-        <ul id="posts-list">
-        </ul>
+        <h3 id="posts-title" class="title"></h3>
+        <div id="newpost-view" class="container mb-3 mt-3 post">
+            <form id="newpost-form" class="row form-inline" method="post">
+                {% csrf_token %}
+                <input id="newpost-body" name="newpost-body" class="col form-control" type="text" placeholder="Write a new post...">
+                <input id="newpost-submit" type="submit" class="col-2 btn btn-light ml-3" value="Send"/>
+            </form>
+        </div>
+        <div id="posts-list">
+        </div>
     </div>
 {% endblock %}

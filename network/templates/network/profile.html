@@ -7,24 +7,34 @@
     {{ profile_user.username |json_script:"profile_username" }}
     {{ user.username |json_script:"username" }}
     <div id="profile-view">
-        <h1>{{ profile_user.username }}</h1>
-        <p> {{ profile_user.email }}</p>
-        <label>Following:</label><label id="following-count"> {{profile_user.following.all | length }} </label>
-        <label>Followers:</label><label id="followers-count"> {{profile_user.followers.all | length }} </label>
-        <br>
-        {% if user.username != profile_user.username %}
-            {% csrf_token %}
-            {% if profile_user in user.following.all %}
-                <button id="follow-btn" class="btn btn-light">Unfollow</button>
-            {% else %}
-                <button id="follow-btn" class="btn btn-light">Follow</button>
+        <div class="card">
+          <div class="card-body">
+            <h1 class="card-title text-center">{{ profile_user.username }}</h1>
+            <p class="card-text">&#128231;<i> {{ profile_user.email }}</i></p>
+          <div class="container">
+            <div class="row justify-content-between">
+                <span class="col"><label><b>Following:</b></label> <label id="following-count"> {{profile_user.following.all | length }} </label></span>
+                <span class="col"><label><b>Followers:</b></label> <label id="followers-count"> {{profile_user.followers.all | length }} </label></span>
+            </div>
+          </div>
+          <div class="conatiner">
+            <div class="row justify-content-center">
+            {% if user.username != profile_user.username %}
+                {% csrf_token %}
+                {% if profile_user in user.following.all %}
+                    <button id="follow-btn" class="col-2 btn btn-primary">Unfollow</button>
+                {% else %}
+                    <button id="follow-btn" class="col-2 btn btn-primary">Follow</button>
+                {% endif %}
             {% endif %}
-        {% endif %}
-        <div id="posts-view">
-            <h3 id="posts-title">{{ profile_user.username }} posts: </h3>
-            <ul id="posts-list">
-            </ul>
+            </div>
+          </div>
+          </div>
         </div>
     </div>
-
+    <div id="posts-view">
+            <h3 id="posts-title" class="title">Posts</h3>
+            <div id="posts-list">
+            </div>
+    </div>
 {% endblock %}
