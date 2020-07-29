@@ -248,8 +248,10 @@ export function show_message(type, message){
     const message_div = document.createElement('div');
     message_div.className = `alert alert-${type}`;
     message_div.innerHTML = message;
+    document.querySelector('#message-div').innerHTML = "";
     document.querySelector('#message-div').append(message_div);
     setTimeout(() => {
-        document.querySelector('#message-div').removeChild(message_div);
+        if(document.querySelector('#message-div').contains(message_div))
+            document.querySelector('#message-div').removeChild(message_div);
     }, 3000);
 }
