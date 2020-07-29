@@ -135,6 +135,8 @@ def api_post(request, post_id):
         post = Post.objects.get(pk=post_id)
     except Post.DoesNotExist:
         return HttpResponseNotFound(f"<h1>Post {post_id} does not exist</h1>")
+    except User.DoesNotExist:
+        return HttpResponseNotFound(f"<h1>User {request.user.id} does not exist</h1>")
 
     if request.method == 'GET':
         return JsonResponse({
@@ -142,6 +144,10 @@ def api_post(request, post_id):
         }, status=201)
 
     if request.method == 'PUT':
+        if request.user.id != post.user.id:
+            return JsonResponse({
+                "error": f"User is different than author of post, edition is forbidden."
+            }, status=403)
         data = json.loads(request.body)
         text = data["new_body"]
         if text == "" or len(text) > 200:

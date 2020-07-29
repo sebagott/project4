@@ -195,7 +195,7 @@ export function set_edits() {
             const edit_div = document.createElement('div');
             edit_div.id = "edit_view";
             edit_div.innerHTML =`<form id="edit-form" class="form-inline"><textarea id="edit-body" rows="3", maxlength="200" name="edit-body" class="form-control">${post_text}</textarea> 
-                                <button id="edit-submit" type="submit" class="btn btn-primary">Save</button></form>`;
+                                <button id="edit-submit" type="submit" class="btn btn-light">&#128190;</button></form>`;
             post_div.replaceChild(edit_div, post_div.childNodes[6]);
             edit_div.firstChild.onsubmit = () => {
                 const post_id = post_div.dataset.postid;
@@ -210,7 +210,7 @@ export function set_edits() {
                             post_div.replaceChild(render_html(result.post).querySelector("pre"),edit_div);
                         }
                         else{
-                            console.log(result);
+                            show_message('danger', result.error);
                         }
                     });
                 return false;
@@ -234,12 +234,22 @@ export async function edit_post(post_id, new_body){
         },
     })
     .then( response  => {
-        if(response.status === 201) {
-            return response.json();
-        }
+        return response.json();
     })
     .catch( error => {
         console.log(error);
     })
     return post;
+}
+
+export function show_message(type, message){
+    if(!type in ['danger','info', 'warning','success'])
+        type = 'info';
+    const message_div = document.createElement('div');
+    message_div.className = `alert alert-${type}`;
+    message_div.innerHTML = message;
+    document.querySelector('#message-div').append(message_div);
+    setTimeout(() => {
+        document.querySelector('#message-div').removeChild(message_div);
+    }, 3000);
 }

@@ -10,8 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     location.href = "/allposts?page=1";
                 }
                 else{
-                    //TODO: Show message.
-                    console.log(result);
+                    api.show_message('danger', result.error);
                 }
             });
         document.querySelector('#newpost-body').innerHTML = '';

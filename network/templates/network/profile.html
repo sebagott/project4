@@ -8,10 +8,12 @@
     {{ user.username |json_script:"username" }}
     <div class="container-fluid mt-4">
         <div class="row justify-content-center">
-                <div id="profile-view" class="col-4">
+                <div id="profile-view" class="col-3">
                     <div class="card">
+                        <div id="profile-img" class="card-img-top  mt-3"><label>👤</label></div>
                         <div class="card-body">
-                            <h1 class="card-title text-center">{{ profile_user.username }}</h1>
+                            <h1 class="card-title text-center">@{{ profile_user.username }}</h1>
+                            <p class="card-text">{{ profile_user.first_name | capfirst }} {{ profile_user.last_name | capfirst }}</p>
                             <p class="card-text">&#128231;<i> {{ profile_user.email }}</i></p>
                             <p class="col"><label><b>Following:</b></label> <label id="following-count"> {{profile_user.following.all | length }} </label></p>
                             <p class="col"><label><b>Followers:</b></label> <label id="followers-count"> {{profile_user.followers.all | length }} </label></p>
@@ -26,12 +28,12 @@
                         </div>
                     </div>
                 </div>
-                <div id="posts-view" class="col-8">
+                <div id="posts-view" class="col-9">
                     <h3 id="posts-title" class="title">Posts</h3>
                     <div id="posts-list">
                     </div>
                     <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-center">
+                        <ul class="pagination pagination-lg justify-content-center">
                         </ul>
                     </nav>
                 </div>

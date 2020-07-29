@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#follow-btn').addEventListener('click', () => {
             api.toggle_following(profile_username)
                 .then(result => {
-                    console.log(result.message); // TODO: Display message
+                    api.show_message('success', result.message);
                     const follow_btn = document.querySelector('#follow-btn');
                     follow_btn.innerHTML = follow_btn.innerHTML === 'Follow' ? 'Unfollow' : 'Follow';
                     document.querySelector('#followers-count').innerHTML = result["followers"];
