@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     location.href = "/allposts?page=1";
                 }
                 else{
-                    // Show message.
+                    //TODO: Show message.
                     console.log(result);
                 }
             });
@@ -68,6 +68,7 @@ function posts_view(view) {
                   document.querySelector("#posts-list").append(api.render_html(p));
               })
               api.set_likes();
+              api.set_edits();
               if( current_page > result.page_range[result.page_range.length-1]){
                   current_page = result.page_range[result.page_range.length-1];
                   params.set("page",current_page);
@@ -89,6 +90,11 @@ function posts_view(view) {
                   document.querySelector("#posts-list").append(api.render_html(p));
           })
           api.set_likes();
+          if( current_page > result.page_range[result.page_range.length-1]){
+              current_page = result.page_range[result.page_range.length-1];
+              params.set("page",current_page);
+              history.replaceState(null, null, "?"+params.toString());
+          }
           api.set_pagination('following', result.page_range, current_page);
       });
   }

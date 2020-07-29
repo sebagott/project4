@@ -9,13 +9,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get user's posts
     api.get_user_posts(profile_username, current_page)
         .then(result => {
-            console.log(result);
             result.posts.forEach(p => {
                 document.querySelector("#posts-list").append(api.render_html(p));
             })
             api.set_likes();
-            if( current_page > result.page_range[result.page_range.length-1])
-                current_page = result.page_range[result.page_range.length-1];
+            if(profile_username === username){
+                api.set_edits();
+            }
+           if( current_page > result.page_range[result.page_range.length-1]){
+                  current_page = result.page_range[result.page_range.length-1];
+                  params.set("page",current_page);
+                  history.replaceState(null, null, "?"+params.toString());
+              }
             api.set_pagination(`profile/${profile_username}`, result.page_range, current_page);
         });
     if(profile_username !== username){
@@ -30,4 +35,5 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
+
 });

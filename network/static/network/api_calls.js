@@ -78,16 +78,31 @@ export function render_html(post){
     let div = document.createElement('div');
     div.className ="post row mb-3";
     const liked_by_user = post.likers.includes(username) ? "liked" : "unliked";
-    div.innerHTML = `<div data-postid="${post.id}">
-                        <a href="/profile/${post.user}">@<b>${post.user}</b></a><label class="timestamp">${post.timestamp}</label>
-                        <pre>${post.body}</pre>
-                        <div class="container-fluid">
-                            <div class="row justify-content-between">
-                                <span class="col like-btn ${liked_by_user}"></span>
-                                <span class="col likes-count-span align-self-end"><label class="likes-count">${post.likes}</label> <b>likes</b></span>
-                            </div>
-                        </div>                         
-                    </div>`
+    if(post.user === username ) {
+        div.innerHTML = `<div data-postid="${post.id}">
+                            <a href="/profile/${post.user}">@<b>${post.user}</b></a><label class="timestamp">${post.timestamp}</label>
+                            <span class="edit-btn" aria-label="Edit">&#128393;</span>                         
+                            <pre>${post.body}</pre>
+                            <div class="container-fluid">
+                                <div class="row justify-content-between">
+                                    <span class="col like-btn ${liked_by_user}"></span>                                    
+                                    <span class="col likes-count-span align-self-end"><label class="likes-count">${post.likes}</label> <b>likes</b></span>
+                                </div>
+                            </div>                         
+                        </div>`
+    }
+    else {
+        div.innerHTML = `<div data-postid="${post.id}">
+                            <a href="/profile/${post.user}">@<b>${post.user}</b></a><label class="timestamp">${post.timestamp}</label>
+                            <pre>${post.body}</pre>
+                            <div class="container-fluid">
+                                <div class="row justify-content-between">
+                                    <span class="col like-btn ${liked_by_user}"></span>
+                                    <span class="col likes-count-span align-self-end"><label class="likes-count">${post.likes}</label> <b>likes</b></span>
+                                </div>
+                            </div>                         
+                        </div>`
+    }
     return div;
 }
 
@@ -166,4 +181,65 @@ export function set_pagination(base_url, page_range, current_page){
 
                   }
      });
+}
+
+export function set_edits() {
+    document.querySelectorAll('.edit-btn').forEach(span => {
+        span.addEventListener('click', () => {
+             // Remove all edition buttons until saved.
+             document.querySelectorAll('.edit-btn').forEach(span => {
+                 span.style.display = "none";
+             });
+            const post_div = span.parentNode;
+            const post_text = post_div.querySelector("pre").textContent;
+            const edit_div = document.createElement('div');
+            edit_div.id = "edit_view";
+            edit_div.innerHTML =`<form id="edit-form" class="form-inline"><textarea id="edit-body" rows="3", maxlength="200" name="edit-body" class="form-control">${post_text}</textarea> 
+                                <button id="edit-submit" type="submit" class="btn btn-primary">Save</button></form>`;
+            post_div.replaceChild(edit_div, post_div.childNodes[6]);
+            edit_div.firstChild.onsubmit = () => {
+                const post_id = post_div.dataset.postid;
+                const new_body = edit_div.querySelector("#edit-body").value;
+                edit_post(post_id, new_body)
+                    .then(result => {
+                       // Enable all edit buttons again.
+                        if("post" in result){
+                            document.querySelectorAll('.edit-btn').forEach(span => {
+                                span.style.display = "inline-block";
+                            });
+                            post_div.replaceChild(render_html(result.post).querySelector("pre"),edit_div);
+                        }
+                        else{
+                            console.log(result);
+                        }
+                    });
+                return false;
+            };
+        })
+    });
+}
+
+
+export async function edit_post(post_id, new_body){
+    const post = await fetch(`/post/${post_id}`, {
+        method: 'PUT',
+        credentials: 'same-origin',
+        body: JSON.stringify({
+            "new_body": new_body
+        }),
+        headers: {
+            "X-CSRFToken": get_crsf_token(),
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        },
+    })
+    .then( response  => {
+        if(response.status === 201) {
+            return response.json();
+        }
+    })
+    .catch( error => {
+        console.log(error);
+    })
+    return post;
 }

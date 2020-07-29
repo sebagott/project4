@@ -15,8 +15,8 @@
                             <p class="card-text">&#128231;<i> {{ profile_user.email }}</i></p>
                             <p class="col"><label><b>Following:</b></label> <label id="following-count"> {{profile_user.following.all | length }} </label></p>
                             <p class="col"><label><b>Followers:</b></label> <label id="followers-count"> {{profile_user.followers.all | length }} </label></p>
+                            {% csrf_token %}
                             {% if user.username != profile_user.username %}
-                                {% csrf_token %}
                                 {% if profile_user in user.following.all %}
                                     <button id="follow-btn" class="btn btn-primary">Unfollow</button>
                                 {% else %}

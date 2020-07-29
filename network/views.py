@@ -131,7 +131,33 @@ def api_create_post(request):
 
 @login_required
 def api_post(request, post_id):
-    pass
+    try:
+        post = Post.objects.get(pk=post_id)
+    except Post.DoesNotExist:
+        return HttpResponseNotFound(f"<h1>Post {post_id} does not exist</h1>")
+
+    if request.method == 'GET':
+        return JsonResponse({
+            "post": post.serialize()
+        }, status=201)
+
+    if request.method == 'PUT':
+        data = json.loads(request.body)
+        text = data["new_body"]
+        if text == "" or len(text) > 200:
+            return JsonResponse({
+                "error": f"Invalid length of text. Must be 1 to 200 characters long."
+            }, status=400)
+        post.body = text
+        post.save()
+        return JsonResponse({
+            "post": post.serialize()
+        }, status=201)
+    else:
+        return JsonResponse({
+            "error": "GET or PUT request required."
+        }, status=400)
+
 
 @login_required
 def api_like_post(request, post_id):
