@@ -14,9 +14,7 @@ export async function create_post(body){
         },
     })
     .then( response  => {
-        if(response.status === 201) {
-            return response.json();
-        }
+        return response.json();
     })
     .catch( error => {
         console.log(error);
@@ -50,16 +48,16 @@ function get_crsf_token(){
    return document.querySelector("[name=csrfmiddlewaretoken]").value;
 }
 
-export async function get_all_posts(){
-    const posts = await fetch(`/posts/all`)
+export async function get_all_posts(page_number = 1){
+    const posts = await fetch(`/posts/all?page=${page_number}`)
     .then( response  => response.json())
     .catch( error => {
         console.log(error);
     })
     return posts;
 }
-export async function get_following_posts(){
-    const posts = await fetch(`/posts/following`)
+export async function get_following_posts(page_number = 1){
+    const posts = await fetch(`/posts/following?page=${page_number}`)
     .then( response  => response.json())
     .catch( error => {
         console.log(error);
@@ -67,8 +65,8 @@ export async function get_following_posts(){
     return posts;
 }
 
-export async function get_user_posts(username){
-    const posts = await fetch(`/posts/${username}`)
+export async function get_user_posts(username, page_number = 1){
+    const posts = await fetch(`/posts/${username}?page=${page_number}`)
     .then( response  => response.json())
     .catch( error => {
         console.log(error);
@@ -78,12 +76,12 @@ export async function get_user_posts(username){
 
 export function render_html(post){
     let div = document.createElement('div');
-    div.className ="post mb-3";
+    div.className ="post row mb-3";
     const liked_by_user = post.likers.includes(username) ? "liked" : "unliked";
     div.innerHTML = `<div data-postid="${post.id}">
                         <a href="/profile/${post.user}">@<b>${post.user}</b></a><label class="timestamp">${post.timestamp}</label>
                         <pre>${post.body}</pre>
-                        <div class="container">
+                        <div class="container-fluid">
                             <div class="row justify-content-between">
                                 <span class="col like-btn ${liked_by_user}"></span>
                                 <span class="col likes-count-span align-self-end"><label class="likes-count">${post.likes}</label> <b>likes</b></span>
@@ -116,6 +114,8 @@ export async function toggle_like(post_id){
 export function set_likes() {
     document.querySelectorAll('.like-btn').forEach(span => {
         span.addEventListener('click', () => {
+            if(username === "")
+                return;
             const post_id = span.parentNode.parentNode.parentNode.dataset.postid;
             if(span.classList.contains('liked'))
                 toggle_like(post_id).then(result => {
@@ -129,5 +129,41 @@ export function set_likes() {
                 })
         })
     });
+}
 
+export function set_pagination(base_url, page_range, current_page){
+
+    // Previous page btn
+    const prev_li = document.createElement('li');
+    prev_li.className = current_page === 1? "page-item disabled" : "page-item";
+    prev_li.innerHTML = '<span id="prev-page-btn" class="page-link" aria-label="Previous" aria-hidden="true">&laquo;</span>';
+    document.querySelector('.pagination').append(prev_li);
+    page_range.forEach(page_num => {
+        const li = document.createElement('li');
+        li.className = "page-item";
+        li.innerHTML = current_page === page_num? `<span class="page-link active">${page_num}</span>` : `<span class="page-link">${page_num}</span>`
+        document.querySelector('.pagination').append(li);
+    });
+    const next_li = document.createElement('li');
+    next_li.className = current_page === page_range[page_range.length-1] ? "page-item disabled" : "page-item";
+    next_li.innerHTML = '<span id="next-page-btn" class="page-link" aria-label="Next" aria-hidden="true">&raquo;</span>'
+    document.querySelector('.pagination').append(next_li);
+    // Set click listeners and page changes.
+     document.querySelectorAll('.page-item').forEach(btn => {
+                  let redirect_page_num = current_page;
+                  if (!btn.classList.contains("disabled")) {
+                      btn.addEventListener('click', () => {
+                          if (btn.firstChild.id === 'prev-page-btn'){
+                              redirect_page_num -= 1;
+                          }
+                          else if (btn.firstChild.id === 'next-page-btn')
+                              redirect_page_num += 1;
+                          else {
+                              redirect_page_num = parseInt(btn.firstChild.innerHTML);
+                          }
+                          location.href = `/${base_url}?page=${redirect_page_num}`;
+                      })
+
+                  }
+     });
 }

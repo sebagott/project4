@@ -6,16 +6,20 @@
 {% block body %}
     {{ following |json_script:"following" }}
 
-    <div id="posts-view">
-        <h3 id="posts-title" class="title"></h3>
-        <div id="newpost-view" class="container mb-3 mt-3 post">
+    <div id="posts-view" class="container-fluid">
+        <div id="newpost-view" class="container-fluid mb-3 mt-3 post">
             <form id="newpost-form" class="row form-inline" method="post">
                 {% csrf_token %}
-                <input id="newpost-body" name="newpost-body" class="col form-control" type="text" placeholder="Write a new post...">
-                <input id="newpost-submit" type="submit" class="col-2 btn btn-light ml-3" value="Send"/>
+                <textarea id="newpost-body" rows="3" maxlength="200" name="newpost-body" class="col form-control" placeholder="Write a new post..."></textarea>
+                <input id="newpost-submit" type="submit" class="btn btn-light ml-3" value="➤"/>
             </form>
         </div>
-        <div id="posts-list">
+        <h3 id="posts-title" class="title"></h3>
+        <div id="posts-list" class="container-fluid">
         </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+            </ul>
+        </nav>
     </div>
 {% endblock %}

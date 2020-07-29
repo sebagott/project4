@@ -4,14 +4,19 @@ const profile_username = JSON.parse(document.getElementById('profile_username').
 const username = JSON.parse(document.getElementById('username').textContent);
 
 document.addEventListener('DOMContentLoaded', function() {
-
+    const params = new URLSearchParams(window.location.search);
+    let current_page = parseInt(params.get("page")) || 1;
     // Get user's posts
-    api.get_user_posts(profile_username)
-        .then(posts => {
-            posts.forEach(p => {
+    api.get_user_posts(profile_username, current_page)
+        .then(result => {
+            console.log(result);
+            result.posts.forEach(p => {
                 document.querySelector("#posts-list").append(api.render_html(p));
             })
             api.set_likes();
+            if( current_page > result.page_range[result.page_range.length-1])
+                current_page = result.page_range[result.page_range.length-1];
+            api.set_pagination(`profile/${profile_username}`, result.page_range, current_page);
         });
     if(profile_username !== username){
         document.querySelector('#follow-btn').addEventListener('click', () => {

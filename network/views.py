@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, HttpResponseNotFound
 from django.shortcuts import render
@@ -9,7 +10,7 @@ from .models import User, Post
 
 
 def index(request):
-    return render(request, "network/index.html")
+    return HttpResponseRedirect(reverse("allposts"))
 
 
 def all_posts(request):
@@ -112,7 +113,12 @@ def api_create_post(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         user = User.objects.get(pk=request.user.id)
-        post = Post(user=user, body=data["body"])
+        text = data["body"]
+        if text == "" or len(text) > 200:
+            return JsonResponse({
+                "error": f"Invalid length of text. Must be 1 to 200 characters long."
+            }, status=400)
+        post = Post(user=user, body=text)
         post.save()
         return JsonResponse({
             "post": post.serialize()
@@ -154,9 +160,15 @@ def api_like_post(request, post_id):
 
 
 def api_all_posts(request):
-    # Get all posts in reverse chronologial order
     posts = Post.objects.order_by("-timestamp").all()
-    return JsonResponse([p.serialize() for p in posts], safe=False)
+    paginator = Paginator(posts, 10)  # Show 10 posts per page.
+    page_number = int(request.GET.get('page')) or 1
+    page_obj = paginator.get_page(page_number)
+    return JsonResponse({
+        'posts': [p.serialize() for p in page_obj.object_list],
+        'current_page': page_number,
+        'page_range': [x for x in paginator.page_range],
+    }, safe=False)
 
 @login_required
 def api_all_user_posts(request, username):
@@ -164,7 +176,14 @@ def api_all_user_posts(request, username):
     try:
         user = User.objects.get(username=username)
         posts = Post.objects.order_by("-timestamp").filter(user=user)
-        return JsonResponse([p.serialize() for p in posts], safe=False, status=201)
+        paginator = Paginator(posts, 10)  # Show 10 posts per page.
+        page_number = int(request.GET.get('page')) or 1
+        page_obj = paginator.get_page(page_number)
+        return JsonResponse({
+            'posts': [p.serialize() for p in page_obj.object_list],
+            'current_page': page_number,
+            'page_range': [x for x in paginator.page_range],
+        }, safe=False)
     except User.DoesNotExist:
         return JsonResponse({
             "error": "User does not exist"
@@ -175,7 +194,14 @@ def api_following_posts(request):
     try:
         user = User.objects.get(pk=request.user.id)
         posts = Post.objects.order_by("-timestamp").filter(user__in=user.following.all())
-        return JsonResponse([p.serialize() for p in posts], safe=False, status=201)
+        paginator = Paginator(posts, 10)  # Show 10 posts per page.
+        page_number = int(request.GET.get('page')) or 1
+        page_obj = paginator.get_page(page_number)
+        return JsonResponse({
+            'posts': [p.serialize() for p in page_obj.object_list],
+            'current_page': page_number,
+            'page_range': [x for x in paginator.page_range],
+        }, safe=False)
     except User.DoesNotExist:
         return JsonResponse({
             "error": "User does not exist"
