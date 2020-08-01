@@ -211,7 +211,7 @@ def api_all_user_posts(request, username):
     try:
         user = User.objects.get(username=username)
         posts = Post.objects.order_by("-timestamp").filter(user=user)
-        paginator = Paginator(posts, 10)  # Show 10 posts per page.
+        paginator = Paginator(posts, 5)  # Show 5 posts per page.
         page_number = int(request.GET.get('page')) or 1
         page_obj = paginator.get_page(page_number)
         return JsonResponse({
